@@ -69,7 +69,7 @@ const paverProductCards = [
 const images = [
   "/paver1.jpg",
   "/paver2.jpg",
-  "/paver3.jpg",
+  // "/paver3.jpg",
   "/paver4.jpg",
   "/paver5.jpg",
   "/paver6.jpg",
