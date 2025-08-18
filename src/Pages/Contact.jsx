@@ -9,6 +9,7 @@ import {
   Alert,
 } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
   const [formData, setForm] = useState({
@@ -24,6 +25,8 @@ const Contact = () => {
     severity: "success", // success | error
     message: "",
   });
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (name) => (e) => {
     setForm({ ...formData, [name]: e.target.value });
@@ -47,7 +50,7 @@ const Contact = () => {
     return { valid: true };
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const result = validateForm();
 
     if (!result.valid) {
@@ -59,21 +62,59 @@ const Contact = () => {
       return;
     }
 
-    // Here you’d typically send the data to backend.
-    setSnackbar({
-      open: true,
-      severity: "success",
-      message: "Message sent successfully!",
-    });
+    setLoading(true);
 
-    // Clear form
-    setForm({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "",
-      message: "",
-    });
+    try {
+      // EmailJS configuration
+      const serviceID = 'YOUR_SERVICE_ID'; // Replace with your EmailJS service ID
+      const templateID = 'YOUR_TEMPLATE_ID'; // Replace with your EmailJS template ID
+      const publicKey = 'YOUR_PUBLIC_KEY'; // Replace with your EmailJS public key
+
+      // Prepare template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+        to_name: 'KRS Hollow Blocks', // Your company name
+      };
+
+      // Send email using EmailJS
+      const response = await emailjs.send(
+        serviceID,
+        templateID,
+        templateParams,
+        publicKey
+      );
+
+      console.log('Email sent successfully:', response);
+
+      setSnackbar({
+        open: true,
+        severity: "success",
+        message: "Message sent successfully! We'll get back to you soon.",
+      });
+
+      // Clear form
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+
+    } catch (error) {
+      console.error('EmailJS error:', error);
+      setSnackbar({
+        open: true,
+        severity: "error",
+        message: "Failed to send message. Please try again or contact us directly.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,20 +128,22 @@ const Contact = () => {
         alignItems: "center",
         flexDirection: "column",
       }}
-    ><Typography
-                  variant="h1"
-                  sx={{
-                    fontSize: { xs: "1.6rem", sm: "2.2rem", md: "3rem" },
-                    color: "#6278FE",
-                    fontWeight: "bold",
-                    textAlign: { xs: "center", md: "left" },
-                    fontFamily: "'Poppins', sans-serif",
-                  }}
-                >
-                Get In Touch
-                </Typography>
+    >
+      <Typography
+        variant="h1"
+        sx={{
+          fontSize: { xs: "1.6rem", sm: "2.2rem", md: "3rem" },
+          color: "#6278FE",
+          fontWeight: "bold",
+          textAlign: { xs: "center", md: "left" },
+          fontFamily: "'Poppins', sans-serif",
+        }}
+      >
+        Get In Touch
+      </Typography>
+      
       <Typography variant="body1" color="text.secondary" mb={4} textAlign="center">
-        Reach out to us for your construction needs. We’re here to help you with durable and high-quality materials.
+        Reach out to us for your construction needs. We're here to help you with durable and high-quality materials.
       </Typography>
 
       <Paper
@@ -117,11 +160,44 @@ const Contact = () => {
       >
         {/* Left: Contact Form */}
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField label="Name" fullWidth value={formData.name} onChange={handleChange("name")} />
-          <TextField label="Email" type="email" fullWidth value={formData.email} onChange={handleChange("email")} />
-          <TextField label="Phone number" fullWidth value={formData.phone} onChange={handleChange("phone")} />
-          <TextField label="Subject" fullWidth value={formData.subject} onChange={handleChange("subject")} />
-          <TextField label="Message" multiline rows={4} fullWidth value={formData.message} onChange={handleChange("message")} />
+          <TextField 
+            label="Name" 
+            fullWidth 
+            value={formData.name} 
+            onChange={handleChange("name")}
+            required
+          />
+          <TextField 
+            label="Email" 
+            type="email" 
+            fullWidth 
+            value={formData.email} 
+            onChange={handleChange("email")}
+            required
+          />
+          <TextField 
+            label="Phone number" 
+            fullWidth 
+            value={formData.phone} 
+            onChange={handleChange("phone")}
+            required
+          />
+          <TextField 
+            label="Subject" 
+            fullWidth 
+            value={formData.subject} 
+            onChange={handleChange("subject")}
+            required
+          />
+          <TextField 
+            label="Message" 
+            multiline 
+            rows={4} 
+            fullWidth 
+            value={formData.message} 
+            onChange={handleChange("message")}
+            required
+          />
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
             <Button
@@ -129,20 +205,19 @@ const Contact = () => {
               color="primary"
               sx={{ borderRadius: 5, px: 4, alignSelf: "flex-start" }}
               onClick={handleSubmit}
+              disabled={loading}
             >
-              Send Message →
+              {loading ? "Sending..." : "Send Message →"}
             </Button>
+            
             <a href="https://wa.me/919790086894" target="_blank" rel="noopener noreferrer">
-
-
-            <Button
-              variant="outlined"
-
-              startIcon={<WhatsAppIcon />}
-               sx={{ borderRadius: 5, alignSelf: "flex-start",color: "#6278FE", }}
-            >
-              Chat on WhatsApp
-            </Button>
+              <Button
+                variant="outlined"
+                startIcon={<WhatsAppIcon />}
+                sx={{ borderRadius: 5, alignSelf: "flex-start", color: "#6278FE" }}
+              >
+                Chat on WhatsApp
+              </Button>
             </a>
           </Box>
         </Box>
@@ -159,13 +234,14 @@ const Contact = () => {
         >
           <iframe
             title="KRS Hollow Block Location"
-            src="https://maps.app.goo.gl/3dsZfrXaNy13b9J26" // Replace with your real embed link
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3926.217874586154!2d77.63574087503928!3d10.45115708966296!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba9e1ee91ade487%3A0x42474c63034579b1!2sKRS%20hollow%20block!5e0!3m2!1sen!2sin!4v1723641000000!5m2!1sen!2sin"
             width="100%"
-            height="100%"
+            height="490"
             style={{ border: 0 }}
             allowFullScreen=""
             loading="lazy"
-          ></iframe>
+            referrerPolicy="no-referrer-when-downgrade"
+          />
         </Box>
       </Paper>
 
