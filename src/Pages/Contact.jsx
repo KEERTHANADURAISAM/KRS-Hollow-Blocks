@@ -159,7 +159,7 @@ const Contact = () => {
         >
           <iframe
             title="KRS Hollow Block Location"
-            src="https://maps.app.goo.gl/qevFzy1gKWgdoDuW7" // Replace with your real embed link
+            src="https://maps.app.goo.gl/3dsZfrXaNy13b9J26" // Replace with your real embed link
             width="100%"
             height="100%"
             style={{ border: 0 }}
